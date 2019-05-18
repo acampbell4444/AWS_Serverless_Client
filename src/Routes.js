@@ -3,7 +3,8 @@ import { BrowserRouter, Route, Switch } 		from 'react-router-dom'
 import Home 									              from './containers/Home'
 import App										              from './App'
 import Signup 									            from './containers/Signup'
-import Login 									              from './containers/NewNote'
+import Login 									              from './containers/Login'
+import NewNote 									            from './containers/NewNote'
 import NotFound 								            from './containers/NotFound'
 
 const Root = () => (

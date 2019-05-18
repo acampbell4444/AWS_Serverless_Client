@@ -1,9 +1,10 @@
-import { API } from 'aws-amplify'
+import { API, Storage } from 'aws-amplify'
 
 //INITIAL STATE//
 
 const initState = {
-  newNote: null
+  newNote: null,
+  allNotes: []
 }
 
 //////////////////
@@ -17,8 +18,11 @@ const reducer = (state=initState, action) => {
 
   case CREATE_NOTE:
     newState.newNote = action.note
-    break    
+    break      
 
+  case LIST_ALL_NOTES:
+    newState.allNotes = action.notes
+    break    
 
   default:
     return state
@@ -30,7 +34,8 @@ const reducer = (state=initState, action) => {
 
 //CONSTANTS//
 
-const CREATE_NOTE  = 'CREATE_NOTE'
+const CREATE_NOTE     = 'CREATE_NOTE'
+const LIST_ALL_NOTES  = 'LIST_ALL_NOTES'
 
 
 /////////////////
@@ -43,24 +48,39 @@ const postNote = note => dispatch =>
     note
   })
 
+const listAllNotes = notes => dispatch => 
+  dispatch({
+    type: LIST_ALL_NOTES,
+    notes
+  })
+
 
 /////////////////////
 
 //THUNKS//
 
-export const createNote = (e, content, upload, history) => dispatch => {
-    const body = { content, attachment: upload}
-    API.post('notes', '/notes', {
-      body: {content}
+export const createNote = (e, content, file, history) => dispatch => {
+    const filename = `${Date.now()}-${file.name}`
+    Storage.vault.put(filename, file, {
+      contentType: file.type
     })
-    .then(result => console.log('res', result))
-    .then(() =>  dispatch(postNote(body)))
+    .then(stored => {
+      return API.post('notes', '/notes', {
+        body: {content, attachment: stored.key}
+      })
+    })
+    .then(result =>  {
+      dispatch(postNote(result))
+      history.push('/')
+    })
     .catch(err => console.log('err: ' + err))
-
-    // history.push('/')
 }
 
-
+export const getAllNotes = () => dispatch => {
+  return API.get("notes", "/notes")
+  .then(allNotes => dispatch(listAllNotes(allNotes)))
+  .catch(err => console.log(err))
+}
 
 
 /////////////////////////////

@@ -21,8 +21,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   handleSubmit(e, content, upload, history){
     e.preventDefault()
-    return dispatch(createNote(e, content, upload, history))
-  }
+    return dispatch(createNote(e, content, upload[0], history))
+  },
 })
 
 
